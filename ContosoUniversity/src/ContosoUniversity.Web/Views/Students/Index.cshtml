@@ -1,0 +1,54 @@
+@model X.PagedList.IPagedList<ContosoUniversity.Application.DTOs.StudentDto>
+
+@{
+    ViewBag.Title = "Students";
+}
+
+<h2>Students</h2>
+<br />
+<p>
+    <!-- Tag Helper asp-action replaces Html.ActionLink / onClick location.href -->
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+</p>
+<br />
+<!-- Tag Helper form replaces Html.BeginForm -->
+<form asp-action="Index" method="get">
+    <p>
+        <b>Find by name:</b>
+        <input type="text" name="SearchString" value="@ViewBag.CurrentFilter" />
+        <input class="btn" type="submit" value="Search" />
+    </p>
+</form>
+<br />
+<table class="table">
+    <tr>
+        <th>
+            <!-- Tag Helper asp-route-* replaces Html.ActionLink with route values -->
+            <a asp-action="Index" asp-route-sortOrder="@ViewBag.NameSortParm" asp-route-currentFilter="@ViewBag.CurrentFilter">Last Name</a>
+        </th>
+        <th>First Name</th>
+        <th>
+            <a asp-action="Index" asp-route-sortOrder="@ViewBag.DateSortParm" asp-route-currentFilter="@ViewBag.CurrentFilter">Enrollment Date</a>
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@Html.DisplayFor(modelItem => item.LastName)</td>
+            <td>@Html.DisplayFor(modelItem => item.FirstMidName)</td>
+            <td>@Html.DisplayFor(modelItem => item.EnrollmentDate)</td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-warning">Edit</a>
+                <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-info">Details</a>
+                <a asp-action="Delete" asp-route-id="@item.ID" class="btn btn-danger">Delete</a>
+            </td>
+        </tr>
+    }
+</table>
+<br />
+Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+
+@Html.PagedListPager(Model, page => Url.Action("Index",
+    new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
