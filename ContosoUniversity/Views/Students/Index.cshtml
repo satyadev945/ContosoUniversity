@@ -1,9 +1,10 @@
-﻿@model PagedList.IPagedList<ContosoUniversity.Models.Student>
-@using PagedList.Mvc;
-<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+﻿@model X.PagedList.IPagedList<ContosoUniversity.Models.Student>
+@using X.PagedList
+@using X.PagedList.Mvc.Core
+<link href="~/css/PagedList.css" rel="stylesheet" type="text/css" />
 
 @{
-    ViewBag.Title = "Students";
+    ViewData["Title"] = "Students";
 }
 
 <h2>Students</h2>
@@ -16,20 +17,20 @@
 @using (Html.BeginForm("Index", "Students", FormMethod.Get))
 {
     <p>
-        <b>Find by name:</b> @Html.TextBox("SearchString", ViewBag.CurrentFilter as string)
+        <b>Find by name:</b> @Html.TextBox("SearchString", (string)ViewData["CurrentFilter"])
         <input class="btn" type="submit" value="Search" />
     </p><br />
 }
 <table class="table">
     <tr>
         <th>
-            @Html.ActionLink("Last Name", "Index", new { sortOrder = ViewBag.NameSortParm, currentFilter = ViewBag.CurrentFilter })
+            @Html.ActionLink("Last Name", "Index", new { sortOrder = (string)ViewData["NameSortParm"], currentFilter = (string)ViewData["CurrentFilter"] })
         </th>
         <th>
             First Name
         </th>
         <th>
-            @Html.ActionLink("Enrollment Date", "Index", new { sortOrder = ViewBag.DateSortParm, currentFilter = ViewBag.CurrentFilter })
+            @Html.ActionLink("Enrollment Date", "Index", new { sortOrder = (string)ViewData["DateSortParm"], currentFilter = (string)ViewData["CurrentFilter"] })
         </th>
         <th></th>
     </tr>
@@ -59,5 +60,5 @@
 <br />
 Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
 
-@Html.PagedListPager(Model, page => Url.Action("Index",
-    new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
+@Html.PagedListPager((IPagedList)Model, page => Url.Action("Index",
+    new { page, sortOrder = (string)ViewData["Currentsort"], currentFilter = (string)ViewData["CurrentFilter"] }))

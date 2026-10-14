@@ -1,15 +1,14 @@
+using Microsoft.EntityFrameworkCore.Migrations;
+
 namespace ContosoUniversity.Migrations
 {
-    using System;
-    using System.Data.Entity.Migrations;
-    
-    public partial class Initial : DbMigration
+    public partial class Initial : Migration
     {
-        public override void Up()
+        protected override void Up(MigrationBuilder migrationBuilder)
         {
         }
-        
-        public override void Down()
+
+        protected override void Down(MigrationBuilder migrationBuilder)
         {
         }
     }

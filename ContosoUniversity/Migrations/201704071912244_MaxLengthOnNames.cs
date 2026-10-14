@@ -1,20 +1,49 @@
+using Microsoft.EntityFrameworkCore.Migrations;
+
 namespace ContosoUniversity.Migrations
 {
-    using System;
-    using System.Data.Entity.Migrations;
-    
-    public partial class MaxLengthOnNames : DbMigration
+    public partial class MaxLengthOnNames : Migration
     {
-        public override void Up()
+        protected override void Up(MigrationBuilder migrationBuilder)
         {
-            AlterColumn("dbo.Student", "LastName", c => c.String(maxLength: 50));
-            AlterColumn("dbo.Student", "FirstMidName", c => c.String(maxLength: 50));
+            migrationBuilder.AlterColumn<string>(
+                name: "LastName",
+                table: "Student",
+                type: "nvarchar(50)",
+                maxLength: 50,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "FirstMidName",
+                table: "Student",
+                type: "nvarchar(50)",
+                maxLength: 50,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)");
         }
-        
-        public override void Down()
+
+        protected override void Down(MigrationBuilder migrationBuilder)
         {
-            AlterColumn("dbo.Student", "FirstMidName", c => c.String());
-            AlterColumn("dbo.Student", "LastName", c => c.String());
+            migrationBuilder.AlterColumn<string>(
+                name: "FirstMidName",
+                table: "Student",
+                type: "nvarchar(max)",
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(50)",
+                oldMaxLength: 50);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "LastName",
+                table: "Student",
+                type: "nvarchar(max)",
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(50)",
+                oldMaxLength: 50);
         }
     }
 }

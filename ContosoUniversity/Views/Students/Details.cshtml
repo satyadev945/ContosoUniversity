@@ -1,7 +1,7 @@
 ﻿@model ContosoUniversity.Models.Student
 
 @{
-    ViewBag.Title = "Details";
+    ViewData["Title"] = "Details";
 }
 
 <h2>Details</h2>
@@ -61,6 +61,6 @@
 
 </div>
 <p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.ID }) |
-    @Html.ActionLink("Back to List", "Index")
+    <a asp-action="Edit" asp-route-id="@Model.ID" class="btn btn-info">Edit</a> |
+    <a asp-action="Index" class="btn btn-link">Back to List</a>
 </p>

@@ -1,30 +1,79 @@
+using Microsoft.EntityFrameworkCore.Migrations;
+
 namespace ContosoUniversity.Migrations
 {
-    using System;
-    using System.Data.Entity.Migrations;
-    
-    public partial class ComplexDataModel : DbMigration
+    public partial class ComplexDataModel : Migration
     {
-        public override void Up()
+        protected override void Up(MigrationBuilder migrationBuilder)
         {
-            RenameTable(name: "dbo.InstructorCourse", newName: "CourseInstructor");
-            RenameColumn(table: "dbo.CourseInstructor", name: "Instructor_ID", newName: "InstructorID");
-            RenameColumn(table: "dbo.CourseInstructor", name: "Course_CourseID", newName: "CourseID");
-            RenameIndex(table: "dbo.CourseInstructor", name: "IX_Course_CourseID", newName: "IX_CourseID");
-            RenameIndex(table: "dbo.CourseInstructor", name: "IX_Instructor_ID", newName: "IX_InstructorID");
-            DropPrimaryKey("dbo.CourseInstructor");
-            AddPrimaryKey("dbo.CourseInstructor", new[] { "CourseID", "InstructorID" });
+            migrationBuilder.RenameTable(
+                name: "InstructorCourse",
+                newName: "CourseInstructor");
+
+            migrationBuilder.RenameColumn(
+                name: "Instructor_ID",
+                table: "CourseInstructor",
+                newName: "InstructorID");
+
+            migrationBuilder.RenameColumn(
+                name: "Course_CourseID",
+                table: "CourseInstructor",
+                newName: "CourseID");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_Course_CourseID",
+                table: "CourseInstructor",
+                newName: "IX_CourseID");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_Instructor_ID",
+                table: "CourseInstructor",
+                newName: "IX_InstructorID");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_CourseInstructor",
+                table: "CourseInstructor");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_CourseInstructor",
+                table: "CourseInstructor",
+                columns: new[] { "CourseID", "InstructorID" });
         }
-        
-        public override void Down()
+
+        protected override void Down(MigrationBuilder migrationBuilder)
         {
-            DropPrimaryKey("dbo.CourseInstructor");
-            AddPrimaryKey("dbo.CourseInstructor", new[] { "Instructor_ID", "Course_CourseID" });
-            RenameIndex(table: "dbo.CourseInstructor", name: "IX_InstructorID", newName: "IX_Instructor_ID");
-            RenameIndex(table: "dbo.CourseInstructor", name: "IX_CourseID", newName: "IX_Course_CourseID");
-            RenameColumn(table: "dbo.CourseInstructor", name: "CourseID", newName: "Course_CourseID");
-            RenameColumn(table: "dbo.CourseInstructor", name: "InstructorID", newName: "Instructor_ID");
-            RenameTable(name: "dbo.CourseInstructor", newName: "InstructorCourse");
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_CourseInstructor",
+                table: "CourseInstructor");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_CourseInstructor",
+                table: "CourseInstructor",
+                columns: new[] { "InstructorID", "CourseID" });
+
+            migrationBuilder.RenameIndex(
+                name: "IX_InstructorID",
+                table: "CourseInstructor",
+                newName: "IX_Instructor_ID");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_CourseID",
+                table: "CourseInstructor",
+                newName: "IX_Course_CourseID");
+
+            migrationBuilder.RenameColumn(
+                name: "CourseID",
+                table: "CourseInstructor",
+                newName: "Course_CourseID");
+
+            migrationBuilder.RenameColumn(
+                name: "InstructorID",
+                table: "CourseInstructor",
+                newName: "Instructor_ID");
+
+            migrationBuilder.RenameTable(
+                name: "CourseInstructor",
+                newName: "InstructorCourse");
         }
     }
 }

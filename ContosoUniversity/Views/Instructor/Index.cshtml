@@ -1,7 +1,7 @@
 ﻿@model ContosoUniversity.ViewModels.InstructorIndexData
 
 @{
-    ViewBag.Title = "Instructors";
+    ViewData["Title"] = "Instructors";
 }
 
 <h2>Instructors</h2>
@@ -24,7 +24,7 @@
     @foreach (var item in Model.Instructors)
     {
         string selectedRow = "";
-        if (item.ID == ViewBag.InstructorID)
+        if (item.ID == (int?)ViewData["InstructorID"])
         {
             selectedRow = "success";
         }
@@ -49,10 +49,6 @@
                 <button class="btn btn-warning" onClick="location.href =' @Url.Action("Edit", "Instructor", new { id = item.ID })';return false;">Edit</button>
                 <button class="btn btn-info" onClick="location.href =' @Url.Action("Details", "Instructor", new { id = item.ID  })';return false;">Details</button>
                 <button class="btn btn-danger" onClick="location.href =' @Url.Action("Delete", "Instructor", new { id = item.ID  })';return false;">Delete</button>
-                @*@Html.ActionLink("Select", "Index", new { id = item.ID }) |
-                @Html.ActionLink("Edit", "Edit", new { id = item.ID }) |
-                @Html.ActionLink("Details", "Details", new { id = item.ID }) |
-                @Html.ActionLink("Delete", "Delete", new { id = item.ID })*@
             </td>
         </tr>
     }
@@ -73,14 +69,13 @@
         @foreach (var item in Model.Courses)
         {
             string selectedRow = "";
-            if (item.CourseID == ViewBag.CourseID)
+            if (item.CourseID == (int?)ViewData["CourseID"])
             {
                 selectedRow = "success";
             }
             <tr class="@selectedRow">
                 <td>
                     <button class="btn " onClick="location.href =' @Url.Action("Index", "Instructor", new { courseId = item.CourseID })';return false;">Select</button>
-                    @*@Html.ActionLink("Select", "Index", new { courseID = item.CourseID })*@
                 </td>
                 <td>
                     @item.CourseID
@@ -97,9 +92,7 @@
     </table>
     if (Model.Enrollments != null)
     {
-        <h3>
-            Students Enrolled in Selected Course
-        </h3>
+        <h3></h3>
         <table class="table">
             <tr>
                 <th>Name</th>

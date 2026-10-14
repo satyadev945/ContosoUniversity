@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Net;
-using System.Web;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using ContosoUniversity.DAL;
 using ContosoUniversity.Models;
 using ContosoUniversity.ViewModels;
@@ -17,7 +17,7 @@ namespace ContosoUniversity.Controllers
         private SchoolContext db = new SchoolContext();
 
         // GET: Instructor
-        public ActionResult Index(int? id, int? courseID)
+        public IActionResult Index(int? id, int? courseID)
         {
             var viewModel = new InstructorIndexData();
             viewModel.Instructors = db.Instructors
@@ -27,14 +27,14 @@ namespace ContosoUniversity.Controllers
 
             if (id != null)
             {
-                ViewBag.InstructorID = id.Value;
+                ViewData["InstructorID"] = id.Value;
                 viewModel.Courses = viewModel.Instructors.Where(
                     i => i.ID == id.Value).Single().Courses;
             }
 
             if (courseID != null)
             {
-                ViewBag.CourseID = courseID.Value;
+                ViewData["CourseID"] = courseID.Value;
                 // Lazy loading
                 //viewModel.Enrollments = viewModel.Courses.Where(
                 //    x => x.CourseID == courseID).Single().Enrollments;
@@ -53,22 +53,22 @@ namespace ContosoUniversity.Controllers
         }
 
         // GET: Instructor/Details/5
-        public ActionResult Details(int? id)
+        public IActionResult Details(int? id)
         {
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return new StatusCodeResult(400);
             }
             Instructor instructor = db.Instructors.Find(id);
             if (instructor == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
             return View(instructor);
         }
 
         // GET: Instructor/Create
-        public ActionResult Create()
+        public IActionResult Create()
         {
             ViewBag.ID = new SelectList(db.OfficeAssignments, "InstructorID", "Location");
             return View();
@@ -79,7 +79,7 @@ namespace ContosoUniversity.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ID,LastName,FirstMidName,HireDate")] Instructor instructor)
+        public IActionResult Create([Bind("ID,LastName,FirstMidName,HireDate")] Instructor instructor)
         {
             if (ModelState.IsValid)
             {
@@ -93,16 +93,16 @@ namespace ContosoUniversity.Controllers
         }
 
         // GET: Instructor/Edit/5
-        public ActionResult Edit(int? id)
+        public IActionResult Edit(int? id)
         {
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return new StatusCodeResult(400);
             }
             Instructor instructor = db.Instructors.Find(id);
             if (instructor == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
             ViewBag.ID = new SelectList(db.OfficeAssignments, "InstructorID", "Location", instructor.ID);
             return View(instructor);
@@ -113,8 +113,12 @@ namespace ContosoUniversity.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ID,LastName,FirstMidName,HireDate")] Instructor instructor)
+        public IActionResult Edit(int? id, Instructor instructor)
         {
+            if (id == null)
+            {
+                return new StatusCodeResult(400);
+            }
             if (ModelState.IsValid)
             {
                 db.Entry(instructor).State = EntityState.Modified;
@@ -126,24 +130,24 @@ namespace ContosoUniversity.Controllers
         }
 
         // GET: Instructor/Delete/5
-        public ActionResult Delete(int? id)
+        public IActionResult Delete(int? id)
         {
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return new StatusCodeResult(400);
             }
             Instructor instructor = db.Instructors.Find(id);
             if (instructor == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
             return View(instructor);
         }
 
         // POST: Instructor/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int id)
         {
             Instructor instructor = db.Instructors.Find(id);
             db.Instructors.Remove(instructor);

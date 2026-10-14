@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Net;
-using System.Web;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using ContosoUniversity.DAL;
 using ContosoUniversity.Models;
-using PagedList;
-using System.Data.Entity.Infrastructure;
+using X.PagedList;
 
 namespace ContosoUniversity.Controllers
 {
@@ -18,11 +17,11 @@ namespace ContosoUniversity.Controllers
         private SchoolContext db = new SchoolContext();
 
         // GET: Students
-        public ActionResult Index(string sortOrder, string currentFilter,  string searchString, int? page)
+        public IActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
         {
-            ViewBag.Currentsort = sortOrder;
-            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
-            ViewBag.DateSortParm = sortOrder == "Date" ? "date_desc" : "Date";
+            ViewData["Currentsort"] = sortOrder;
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["DateSortParm"] = sortOrder == "Date" ? "date_desc" : "Date";
 
             if (searchString != null)
             {
@@ -33,7 +32,7 @@ namespace ContosoUniversity.Controllers
                 searchString = currentFilter;
             }
 
-            ViewBag.CurrentFilter = searchString;
+            ViewData["CurrentFilter"] = searchString;
 
             var students = from s in db.Students
                            select s;
@@ -42,7 +41,7 @@ namespace ContosoUniversity.Controllers
             {
                 students = students.Where(s => s.LastName.Contains(searchString)
                                            || s.FirstMidName.Contains(searchString));
-                                            
+
             }
             switch (sortOrder)
             {
@@ -66,22 +65,22 @@ namespace ContosoUniversity.Controllers
         }
 
         // GET: Students/Details/5
-        public ActionResult Details(int? id)
+        public IActionResult Details(int? id)
         {
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return new StatusCodeResult(400);
             }
             Student student = db.Students.Find(id);
             if (student == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
             return View(student);
         }
 
         // GET: Students/Create
-        public ActionResult Create()
+        public IActionResult Create()
         {
             return View();
         }
@@ -91,7 +90,7 @@ namespace ContosoUniversity.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "LastName,FirstMidName,EnrollmentDate")] Student student)
+        public IActionResult Create([Bind("LastName,FirstMidName,EnrollmentDate")] Student student)
         {
             try
             {
@@ -102,7 +101,7 @@ namespace ContosoUniversity.Controllers
                     return RedirectToAction("Index");
                 }
             }
-            catch (RetryLimitExceededException)
+            catch (Exception)
             {
                 //Log the error (uncomment dex variable name and add a line here to write a log.
                 ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists see your system administrator.");
@@ -113,16 +112,16 @@ namespace ContosoUniversity.Controllers
         }
 
         // GET: Students/Edit/5
-        public ActionResult Edit(int? id)
+        public IActionResult Edit(int? id)
         {
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return new StatusCodeResult(400);
             }
             Student student = db.Students.Find(id);
             if (student == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
             return View(student);
         }
@@ -130,25 +129,26 @@ namespace ContosoUniversity.Controllers
         // POST: Students/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost, ActionName("Edit")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult EditPost(int? id)
+        public IActionResult Edit(int? id, Student student)
         {
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return new StatusCodeResult(400);
             }
             var studentToUpdate = db.Students.Find(id);
-            if (TryUpdateModel(studentToUpdate, "",
-               new string[] { "LastName", "FirstMidName", "EnrollmentDate" }))
+            if (ModelState.IsValid)
             {
+                db.Entry(studentToUpdate).CurrentValues.SetValues(student);
+                studentToUpdate.ID = id.Value;
                 try
                 {
                     db.SaveChanges();
 
                     return RedirectToAction("Index");
                 }
-                catch (RetryLimitExceededException/* dex */)
+                catch (Exception/* dex */)
                 {
                     //Log the error (uncomment dex variable name and add a line here to write a log.
                     ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists, see your system administrator.");
@@ -158,20 +158,20 @@ namespace ContosoUniversity.Controllers
         }
 
         // GET: Students/Delete/5
-        public ActionResult Delete(int? id, bool? saveChangesError = false)
+        public IActionResult Delete(int? id, bool? saveChangesError = false)
         {
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return new StatusCodeResult(400);
             }
             if (saveChangesError.GetValueOrDefault())
             {
-                ViewBag.ErrorMessage = "Delete failed. Try again, and if the problem persists see your system administrator.";
+                ViewData["ErrorMessage"] = "Delete failed. Try again, and if the problem persists see your system administrator.";
             }
             Student student = db.Students.Find(id);
             if (student == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
             return View(student);
         }
@@ -179,7 +179,7 @@ namespace ContosoUniversity.Controllers
         // POST: Students/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id)
+        public IActionResult Delete(int id)
         {
             try
             {
@@ -196,8 +196,6 @@ namespace ContosoUniversity.Controllers
 
 
         }
-
-
 
 
         protected override void Dispose(bool disposing)

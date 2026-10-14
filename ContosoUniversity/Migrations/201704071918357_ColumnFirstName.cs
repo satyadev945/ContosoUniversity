@@ -1,18 +1,23 @@
+using Microsoft.EntityFrameworkCore.Migrations;
+
 namespace ContosoUniversity.Migrations
 {
-    using System;
-    using System.Data.Entity.Migrations;
-    
-    public partial class ColumnFirstName : DbMigration
+    public partial class ColumnFirstName : Migration
     {
-        public override void Up()
+        protected override void Up(MigrationBuilder migrationBuilder)
         {
-            RenameColumn(table: "dbo.Student", name: "FirstMidName", newName: "FirstName");
+            migrationBuilder.RenameColumn(
+                name: "FirstMidName",
+                table: "Student",
+                newName: "FirstName");
         }
-        
-        public override void Down()
+
+        protected override void Down(MigrationBuilder migrationBuilder)
         {
-            RenameColumn(table: "dbo.Student", name: "FirstName", newName: "FirstMidName");
+            migrationBuilder.RenameColumn(
+                name: "FirstName",
+                table: "Student",
+                newName: "FirstMidName");
         }
     }
 }

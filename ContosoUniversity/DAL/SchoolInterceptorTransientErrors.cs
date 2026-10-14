@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Data.Common;
-using System.Data.Entity;
-using System.Data.Entity.Infrastructure.Interception;
-using System.Data.Entity.SqlServer;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Diagnostics;
 using System.Reflection;
 using System.Linq;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using ContosoUniversity.Logging;
-
 
 //dummy test class for generating errors for database logger
 namespace ContosoUniversity.DAL
@@ -18,7 +15,10 @@ namespace ContosoUniversity.DAL
         private int _counter = 0;
         private ILogger _logger = new Logger();
 
-        public override void ReaderExecuting(DbCommand command, DbCommandInterceptionContext<DbDataReader> interceptionContext)
+        public override InterceptionResult<DbDataReader> ReaderExecuting(
+            DbCommand command,
+            CommandEventData eventData,
+            InterceptionResult<DbDataReader> result)
         {
             bool throwTransientErrors = false;
             if (command.Parameters.Count > 0 && command.Parameters[0].Value.ToString() == "%Throw%")
@@ -32,8 +32,9 @@ namespace ContosoUniversity.DAL
             {
                 _logger.Information("Returning transient error for command: {0}", command.CommandText);
                 _counter++;
-                interceptionContext.Exception = CreateDummySqlException();
+                throw CreateDummySqlException();
             }
+            return base.ReaderExecuting(command, eventData, result);
         }
 
         private SqlException CreateDummySqlException()

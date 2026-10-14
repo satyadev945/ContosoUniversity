@@ -1,10 +1,8 @@
 ﻿using ContosoUniversity.DAL;
 using ContosoUniversity.ViewModels;
-using System;
-using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+using System;
 
 namespace ContosoUniversity.Controllers
 {
@@ -13,12 +11,12 @@ namespace ContosoUniversity.Controllers
 
         private SchoolContext db = new SchoolContext();
 
-        public ActionResult Index()
+        public IActionResult Index()
         {
             return View();
         }
 
-        public ActionResult About()
+        public IActionResult About()
         {
             IQueryable<EnrollmentDataGroup> data = from student in db.Students
                                                    group student by student.EnrollmentDate into dataGroup
@@ -31,9 +29,9 @@ namespace ContosoUniversity.Controllers
             return View(data.ToList());
         }
 
-        public ActionResult Contact()
+        public IActionResult Contact()
         {
-            ViewBag.Message = "Your contact page.";
+            ViewData["Message"] = "Your contact page.";
 
             return View();
         }

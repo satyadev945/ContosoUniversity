@@ -1,14 +1,13 @@
 ﻿@model ContosoUniversity.Models.Course
 
 @{
-    ViewBag.Title = "Create";
+    ViewData["Title"] = "Create";
 }
 
 <h2>Create</h2>
 
 
-@using (Html.BeginForm()) 
-{
+<form asp-action="Create"> 
     @Html.AntiForgeryToken()
     
     <div class="form-horizontal">
@@ -49,16 +48,16 @@
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <input class="btn btn-success" type="submit" value="Create" class="btn btn-default" />
+                <input class="btn btn-success" type="submit" value="Create" />
             </div>
         </div>
     </div>
-}
+</form>
 
 <div>
-    @Html.ActionLink("Back to List", "Index")
+    <a asp-action="Index" class="btn btn-link">Back to List</a>
 </div>
 
 @section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
+    <partial name="_ValidationScriptsPartial" />
 }

@@ -1,13 +1,11 @@
-﻿using System.Data.Entity;
-using System.Data.Entity.SqlServer;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ContosoUniversity.DAL
 {
-    public class SchoolConfiguration : DbConfiguration
+    public static class SchoolConfiguration
     {
-        public SchoolConfiguration()
-        {
-            SetExecutionStrategy("System.Data.SqlClient", () => new SqlAzureExecutionStrategy());
-        }
+        // EF Core 8 configures execution strategy in Program.cs via EnableRetryOnFailure
+        // This class is kept for compatibility but the configuration is now done in Program.cs
     }
 }

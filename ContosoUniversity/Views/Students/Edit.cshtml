@@ -1,14 +1,13 @@
 ﻿@model ContosoUniversity.Models.Student
 
 @{
-    ViewBag.Title = "Edit";
+    ViewData["Title"] = "Edit";
 }
 
 <h2>Edit</h2>
 
 
-@using (Html.BeginForm())
-{
+<form asp-action="Edit">
     @Html.AntiForgeryToken()
     
     <div class="form-horizontal">
@@ -47,12 +46,12 @@
             </div>
         </div>
     </div>
-}
+</form>
 
 <div>
-    @Html.ActionLink("Back to List", "Index")
+    <a asp-action="Index" class="btn btn-link">Back to List</a>
 </div>
 
 @section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
+    <partial name="_ValidationScriptsPartial" />
 }

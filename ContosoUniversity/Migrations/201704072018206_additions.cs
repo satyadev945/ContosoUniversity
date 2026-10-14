@@ -1,89 +1,195 @@
+using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
 namespace ContosoUniversity.Migrations
 {
-    using System;
-    using System.Data.Entity.Migrations;
-    
-    public partial class Additions : DbMigration
+    public partial class Additions : Migration
     {
-        public override void Up()
+        protected override void Up(MigrationBuilder migrationBuilder)
         {
-            CreateTable(
-                "dbo.Department",
-                c => new
-                    {
-                        DepartmentID = c.Int(nullable: false, identity: true),
-                        Name = c.String(maxLength: 50),
-                        Budget = c.Decimal(nullable: false, storeType: "money"),
-                        StartDate = c.DateTime(nullable: false),
-                        InstructorID = c.Int(),
-                    })
-                .PrimaryKey(t => t.DepartmentID)
-                .ForeignKey("dbo.Instructor", t => t.InstructorID)
-                .Index(t => t.InstructorID);
-            
-            CreateTable(
-                "dbo.Instructor",
-                c => new
-                    {
-                        ID = c.Int(nullable: false, identity: true),
-                        LastName = c.String(nullable: false, maxLength: 50),
-                        FirstName = c.String(nullable: false, maxLength: 50),
-                        HireDate = c.DateTime(nullable: false),
-                    })
-                .PrimaryKey(t => t.ID);
-            
-            CreateTable(
-                "dbo.OfficeAssignment",
-                c => new
-                    {
-                        InstructorID = c.Int(nullable: false),
-                        Location = c.String(maxLength: 50),
-                    })
-                .PrimaryKey(t => t.InstructorID)
-                .ForeignKey("dbo.Instructor", t => t.InstructorID)
-                .Index(t => t.InstructorID);
-            
-            CreateTable(
-                "dbo.InstructorCourse",
-                c => new
-                    {
-                        Instructor_ID = c.Int(nullable: false),
-                        Course_CourseID = c.Int(nullable: false),
-                    })
-                .PrimaryKey(t => new { t.Instructor_ID, t.Course_CourseID })
-                .ForeignKey("dbo.Instructor", t => t.Instructor_ID, cascadeDelete: true)
-                .ForeignKey("dbo.Course", t => t.Course_CourseID, cascadeDelete: true)
-                .Index(t => t.Instructor_ID)
-                .Index(t => t.Course_CourseID);
-            
-            AddColumn("dbo.Course", "DepartmentID", c => c.Int(nullable: false));
-            AlterColumn("dbo.Course", "Title", c => c.String(maxLength: 50));
-            AlterColumn("dbo.Student", "LastName", c => c.String(nullable: false, maxLength: 50));
-            AlterColumn("dbo.Student", "FirstName", c => c.String(nullable: false, maxLength: 50));
-            CreateIndex("dbo.Course", "DepartmentID");
-            AddForeignKey("dbo.Course", "DepartmentID", "dbo.Department", "DepartmentID", cascadeDelete: true);
+            migrationBuilder.CreateTable(
+                name: "Instructor",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    LastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    HireDate = table.Column<DateTime>(nullable: false),
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Instructor", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Department",
+                columns: table => new
+                {
+                    DepartmentID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Budget = table.Column<decimal>(type: "money", nullable: false),
+                    StartDate = table.Column<DateTime>(nullable: false),
+                    InstructorID = table.Column<int>(nullable: true),
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Department", x => x.DepartmentID);
+                    table.ForeignKey(
+                        name: "FK_Department_Instructor_InstructorID",
+                        column: x => x.InstructorID,
+                        principalTable: "Instructor",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OfficeAssignment",
+                columns: table => new
+                {
+                    InstructorID = table.Column<int>(nullable: false),
+                    Location = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OfficeAssignment", x => x.InstructorID);
+                    table.ForeignKey(
+                        name: "FK_OfficeAssignment_Instructor_InstructorID",
+                        column: x => x.InstructorID,
+                        principalTable: "Instructor",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CourseInstructor",
+                columns: table => new
+                {
+                    Instructor_ID = table.Column<int>(nullable: false),
+                    Course_CourseID = table.Column<int>(nullable: false),
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CourseInstructor", x => new { x.Instructor_ID, x.Course_CourseID });
+                    table.ForeignKey(
+                        name: "FK_CourseInstructor_Instructor_Instructor_ID",
+                        column: x => x.Instructor_ID,
+                        principalTable: "Instructor",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CourseInstructor_Course_Course_CourseID",
+                        column: x => x.Course_CourseID,
+                        principalTable: "Course",
+                        principalColumn: "CourseID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.AddColumn<int>(
+                name: "DepartmentID",
+                table: "Course",
+                nullable: false,
+                defaultValue: 0);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Title",
+                table: "Course",
+                type: "nvarchar(50)",
+                maxLength: 50,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "FirstName",
+                table: "Student",
+                type: "nvarchar(50)",
+                maxLength: 50,
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "LastName",
+                table: "Student",
+                type: "nvarchar(50)",
+                maxLength: 50,
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Course_DepartmentID",
+                table: "Course",
+                column: "DepartmentID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CourseInstructor_Course_CourseID",
+                table: "CourseInstructor",
+                column: "Course_CourseID");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Course_Department_DepartmentID",
+                table: "Course",
+                column: "DepartmentID",
+                principalTable: "Department",
+                principalColumn: "DepartmentID",
+                onDelete: ReferentialAction.Cascade);
         }
-        
-        public override void Down()
+
+        protected override void Down(MigrationBuilder migrationBuilder)
         {
-            DropForeignKey("dbo.Course", "DepartmentID", "dbo.Department");
-            DropForeignKey("dbo.Department", "InstructorID", "dbo.Instructor");
-            DropForeignKey("dbo.OfficeAssignment", "InstructorID", "dbo.Instructor");
-            DropForeignKey("dbo.InstructorCourse", "Course_CourseID", "dbo.Course");
-            DropForeignKey("dbo.InstructorCourse", "Instructor_ID", "dbo.Instructor");
-            DropIndex("dbo.InstructorCourse", new[] { "Course_CourseID" });
-            DropIndex("dbo.InstructorCourse", new[] { "Instructor_ID" });
-            DropIndex("dbo.OfficeAssignment", new[] { "InstructorID" });
-            DropIndex("dbo.Department", new[] { "InstructorID" });
-            DropIndex("dbo.Course", new[] { "DepartmentID" });
-            AlterColumn("dbo.Student", "FirstName", c => c.String(maxLength: 50));
-            AlterColumn("dbo.Student", "LastName", c => c.String(maxLength: 50));
-            AlterColumn("dbo.Course", "Title", c => c.String());
-            DropColumn("dbo.Course", "DepartmentID");
-            DropTable("dbo.InstructorCourse");
-            DropTable("dbo.OfficeAssignment");
-            DropTable("dbo.Instructor");
-            DropTable("dbo.Department");
+            migrationBuilder.DropForeignKey(
+                name: "FK_Course_Department_DepartmentID",
+                table: "Course");
+
+            migrationBuilder.DropTable(
+                name: "CourseInstructor");
+
+            migrationBuilder.DropTable(
+                name: "OfficeAssignment");
+
+            migrationBuilder.DropTable(
+                name: "Department");
+
+            migrationBuilder.DropTable(
+                name: "Instructor");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Course_DepartmentID",
+                table: "Course");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "LastName",
+                table: "Student",
+                type: "nvarchar(max)",
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(50)",
+                oldMaxLength: 50);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "FirstName",
+                table: "Student",
+                type: "nvarchar(max)",
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(50)",
+                oldMaxLength: 50);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Title",
+                table: "Course",
+                type: "nvarchar(max)",
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(50)",
+                oldMaxLength: 50);
+
+            migrationBuilder.DropColumn(
+                name: "DepartmentID",
+                table: "Course");
         }
     }
 }
