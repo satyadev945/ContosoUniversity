@@ -16,6 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Tests\**\*.cs" LinkBase="Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ContosoUniversity\ContosoUniversity.csproj" />
   </ItemGroup>
 
