@@ -24,7 +24,7 @@ namespace ContosoUniversity.Controllers
 
         public async Task<IActionResult> About()
         {
-            var data = await _db.Students
+            var data = await _db.Students.AsNoTracking()
                 .GroupBy(student => student.EnrollmentDate)
                 .Select(dataGroup => new EnrollmentDataGroup
                 {
