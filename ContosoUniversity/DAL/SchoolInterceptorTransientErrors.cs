@@ -3,7 +3,7 @@ using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure.Interception;
 using System.Data.Entity.SqlServer;
-using System.Data.SqlClient;
+using Npgsql;
 using System.Diagnostics;
 using System.Reflection;
 using System.Linq;
@@ -36,7 +36,7 @@ namespace ContosoUniversity.DAL
             }
         }
 
-        private SqlException CreateDummySqlException()
+        private PostgresException CreateDummySqlException()
         {
             // The instance of SQL Server you attempted to connect to does not support encryption
             var sqlErrorNumber = 20;
