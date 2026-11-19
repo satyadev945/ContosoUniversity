@@ -223,11 +223,14 @@ if (!jQuery) { throw new Error("Bootstrap requires jQuery") }
     $el[val](data[state] || this.options[state])
 
     // push to event loop to allow forms to submit
-    setTimeout(function () {
+    // (Promise + async/await instead of a nested timer callback)
+    var applyDisabledState = async function () {
+      await new Promise(function (resolve) { setTimeout(resolve, 0) })
       state == 'loadingText' ?
         $el.addClass(d).attr(d, d) :
         $el.removeClass(d).removeAttr(d);
-    }, 0)
+    }
+    applyDisabledState()
   }
 
   Button.prototype.toggle = function () {

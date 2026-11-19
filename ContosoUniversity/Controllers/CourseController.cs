@@ -4,32 +4,48 @@ using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using ContosoUniversity.Caching;
 using ContosoUniversity.DAL;
+using ContosoUniversity.Security;
 using ContosoUniversity.Models;
 
 namespace ContosoUniversity.Controllers
 {
     public class CourseController : Controller
     {
+        private const string CourseListCacheKey = "courses:index";
+        private static readonly TimeSpan CourseListTtl = TimeSpan.FromMinutes(1);
+
         private SchoolContext db = new SchoolContext();
+        private readonly IAsyncCache cache = RedisAsyncCache.Instance;
+
+        private async Task PopulateDepartmentsAsync(object selectedDepartment = null)
+        {
+            var departments = await db.Departments.ToListAsync();
+            ViewBag.DepartmentID = new SelectList(departments, "DepartmentID", "Name", selectedDepartment);
+        }
 
         // GET: Course
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            var courses = db.Courses.Include(c => c.Department);
-            return View(courses.ToList());
+            // Data is fetched asynchronously (Memorystore Redis first, DB on miss) before the view renders.
+            var courses = await cache.GetOrCreateAsync(CourseListCacheKey,
+                () => db.Courses.Include(c => c.Department).ToListAsync(),
+                CourseListTtl);
+            return View(courses);
         }
 
         // GET: Course/Details/5
-        public ActionResult Details(int? id)
+        public async Task<ActionResult> Details(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Course course = db.Courses.Find(id);
+            Course course = await db.Courses.FindAsync(id);
             if (course == null)
             {
                 return HttpNotFound();
@@ -38,9 +54,9 @@ namespace ContosoUniversity.Controllers
         }
 
         // GET: Course/Create
-        public ActionResult Create()
+        public async Task<ActionResult> Create()
         {
-            ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID", "Name");
+            await PopulateDepartmentsAsync();
             return View();
         }
 
@@ -49,32 +65,34 @@ namespace ContosoUniversity.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "CourseID,Title,Credits,DepartmentID")] Course course)
+        public async Task<ActionResult> Create([Bind(Include = "CourseID,Title,Credits,DepartmentID")] Course course)
         {
             if (ModelState.IsValid)
             {
+                course.Title = HtmlSanitizerService.Sanitize(course.Title);
                 db.Courses.Add(course);
-                db.SaveChanges();
+                await db.SaveChangesAsync();
+                await cache.RemoveAsync(CourseListCacheKey);
                 return RedirectToAction("Index");
             }
 
-            ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID", "Name", course.DepartmentID);
+            await PopulateDepartmentsAsync(course.DepartmentID);
             return View(course);
         }
 
         // GET: Course/Edit/5
-        public ActionResult Edit(int? id)
+        public async Task<ActionResult> Edit(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Course course = db.Courses.Find(id);
+            Course course = await db.Courses.FindAsync(id);
             if (course == null)
             {
                 return HttpNotFound();
             }
-            ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID", "Name", course.DepartmentID);
+            await PopulateDepartmentsAsync(course.DepartmentID);
             return View(course);
         }
 
@@ -83,26 +101,28 @@ namespace ContosoUniversity.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "CourseID,Title,Credits,DepartmentID")] Course course)
+        public async Task<ActionResult> Edit([Bind(Include = "CourseID,Title,Credits,DepartmentID")] Course course)
         {
             if (ModelState.IsValid)
             {
+                course.Title = HtmlSanitizerService.Sanitize(course.Title);
                 db.Entry(course).State = EntityState.Modified;
-                db.SaveChanges();
+                await db.SaveChangesAsync();
+                await cache.RemoveAsync(CourseListCacheKey);
                 return RedirectToAction("Index");
             }
-            ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID", "Name", course.DepartmentID);
+            await PopulateDepartmentsAsync(course.DepartmentID);
             return View(course);
         }
 
         // GET: Course/Delete/5
-        public ActionResult Delete(int? id)
+        public async Task<ActionResult> Delete(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Course course = db.Courses.Find(id);
+            Course course = await db.Courses.FindAsync(id);
             if (course == null)
             {
                 return HttpNotFound();
@@ -113,11 +133,12 @@ namespace ContosoUniversity.Controllers
         // POST: Course/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
+        public async Task<ActionResult> DeleteConfirmed(int id)
         {
-            Course course = db.Courses.Find(id);
+            Course course = await db.Courses.FindAsync(id);
             db.Courses.Remove(course);
-            db.SaveChanges();
+            await db.SaveChangesAsync();
+            await cache.RemoveAsync(CourseListCacheKey);
             return RedirectToAction("Index");
         }
 

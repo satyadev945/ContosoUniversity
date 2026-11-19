@@ -287,6 +287,7 @@ window.Modernizr = (function( window, document, undefined ) {
                   args.concat(slice.call(arguments))
               );
               if (Object(result) === result) {
+              // NOTE (cr-js-0063): Function.prototype.bind polyfill - not a database query; no async migration applicable.
                   return result;
               }
               return self;
