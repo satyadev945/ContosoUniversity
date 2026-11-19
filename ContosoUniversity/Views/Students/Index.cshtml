@@ -1,6 +1,5 @@
-﻿@model PagedList.IPagedList<ContosoUniversity.Models.Student>
-@using PagedList.Mvc;
-<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+@model ContosoUniversity.ViewModels.PaginatedList<ContosoUniversity.Models.Student>
+<link href="~/css/pagination.css" rel="stylesheet" type="text/css" />
 
 @{
     ViewBag.Title = "Students";
@@ -13,13 +12,12 @@
    
 </p>
 <br />
-@using (Html.BeginForm("Index", "Students", FormMethod.Get))
-{
+<form asp-action="Index" method="get">
     <p>
         <b>Find by name:</b> @Html.TextBox("SearchString", ViewBag.CurrentFilter as string)
         <input class="btn" type="submit" value="Search" />
     </p><br />
-}
+</form>
 <table class="table">
     <tr>
         <th>
@@ -57,7 +55,19 @@
 
 </table>
 <br />
-Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+Page @(Model.TotalPages < Model.PageIndex ? 0 : Model.PageIndex) of @Model.TotalPages
 
-@Html.PagedListPager(Model, page => Url.Action("Index",
-    new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
+<ul class="pagination">
+    <li class="@(Model.HasPreviousPage ? "" : "disabled")">
+        <a asp-action="Index" asp-route-page="@(Model.PageIndex - 1)" asp-route-sortOrder="@ViewBag.CurrentSort" asp-route-currentFilter="@ViewBag.CurrentFilter">&laquo; Previous</a>
+    </li>
+    @for (var p = 1; p <= Model.TotalPages; p++)
+    {
+        <li class="@(p == Model.PageIndex ? "active" : "")">
+            <a asp-action="Index" asp-route-page="@p" asp-route-sortOrder="@ViewBag.CurrentSort" asp-route-currentFilter="@ViewBag.CurrentFilter">@p</a>
+        </li>
+    }
+    <li class="@(Model.HasNextPage ? "" : "disabled")">
+        <a asp-action="Index" asp-route-page="@(Model.PageIndex + 1)" asp-route-sortOrder="@ViewBag.CurrentSort" asp-route-currentFilter="@ViewBag.CurrentFilter">Next &raquo;</a>
+    </li>
+</ul>
