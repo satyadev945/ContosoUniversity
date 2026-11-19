@@ -13,6 +13,7 @@ namespace ContosoUniversity.Models
         [Required]
         [StringLength(50)]
         [Display(Name = "Last Name")]
+        [Column("LastName")]
         public string LastName { get; set; }
 
         [Required]

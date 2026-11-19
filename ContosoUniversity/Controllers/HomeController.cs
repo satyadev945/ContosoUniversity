@@ -30,7 +30,7 @@ namespace ContosoUniversity.Controllers
         {
             var data = await cache.GetOrCreateAsync(EnrollmentStatsCacheKey, () =>
             {
-                IQueryable<EnrollmentDataGroup> query = from student in db.Students
+                IQueryable<EnrollmentDataGroup> query = from student in db.Students.AsNoTracking()
                                                         group student by student.EnrollmentDate into dataGroup
                                                         select new EnrollmentDataGroup()
                                                         {
