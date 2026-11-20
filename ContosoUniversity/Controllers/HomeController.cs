@@ -25,7 +25,7 @@ namespace ContosoUniversity.Controllers
         {
             // Aggregated statistics are read through AWS ElastiCache (Redis) without blocking the request thread.
             var data = await ReferenceDataCache.GetOrAddAsync(CacheKeys.EnrollmentStatistics, () =>
-                (from student in db.Students
+                (from student in db.Students.AsNoTracking()
                  group student by student.EnrollmentDate into dataGroup
                  select new EnrollmentDataGroup()
                  {

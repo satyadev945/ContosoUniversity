@@ -34,6 +34,7 @@ namespace ContosoUniversity.Models
             }
         }
 
+        [ForeignKey("StudentID")]
         public virtual ICollection<Enrollment> Enrollments { get; set; }
     }
 }
