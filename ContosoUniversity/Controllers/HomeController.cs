@@ -1,8 +1,11 @@
-﻿using ContosoUniversity.DAL;
+﻿using ContosoUniversity.Caching;
+using ContosoUniversity.DAL;
 using ContosoUniversity.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 
@@ -13,29 +16,31 @@ namespace ContosoUniversity.Controllers
 
         private SchoolContext db = new SchoolContext();
 
-        public ActionResult Index()
+        public Task<ActionResult> Index()
         {
-            return View();
+            return Task.FromResult<ActionResult>(View());
         }
 
-        public ActionResult About()
+        public async Task<ActionResult> About()
         {
-            IQueryable<EnrollmentDataGroup> data = from student in db.Students
-                                                   group student by student.EnrollmentDate into dataGroup
-                                                   select new EnrollmentDataGroup()
-                                                   {
-                                                       EnrollmentDate = dataGroup.Key,
-                                                       StudentCount = dataGroup.Count()
-                                                   };
+            // Aggregated statistics are read through AWS ElastiCache (Redis) without blocking the request thread.
+            var data = await ReferenceDataCache.GetOrAddAsync(CacheKeys.EnrollmentStatistics, () =>
+                (from student in db.Students
+                 group student by student.EnrollmentDate into dataGroup
+                 select new EnrollmentDataGroup()
+                 {
+                     EnrollmentDate = dataGroup.Key,
+                     StudentCount = dataGroup.Count()
+                 }).ToListAsync());
 
-            return View(data.ToList());
+            return View(data);
         }
 
-        public ActionResult Contact()
+        public Task<ActionResult> Contact()
         {
             ViewBag.Message = "Your contact page.";
 
-            return View();
+            return Task.FromResult<ActionResult>(View());
         }
 
         protected override void Dispose(bool disposing)
