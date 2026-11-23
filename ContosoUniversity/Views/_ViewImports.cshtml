@@ -1,0 +1,5 @@
+@using ContosoUniversity.Security
+@* Anti-XSS: Razor HTML-encodes all output by default. Do not use Html.Raw()/HtmlString on untrusted data.
+   When HTML must be rendered, pass it through the Ganss.Xss-backed sanitizer first
+   (allow-list policy is sourced from AWS Secrets Manager). *@
+@inject IHtmlSanitizerService Sanitizer
